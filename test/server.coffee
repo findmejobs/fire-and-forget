@@ -21,38 +21,39 @@ describe 'ListenServer', ->
     client.close()
     listenServer.stop()
 
-  it 'should start up and accept messages', (done) ->
-    spy = sinon.spy(listenServer, 'handleMessage')
+  describe 'messages', ->
+    it 'should start up and accept messages', (done) ->
+      spy = sinon.spy(listenServer, 'handleMessage')
 
-    message = new Buffer('Some bytes')
-    client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
-      delay 100, ->
-        assert(spy.called)
-        listenServer.handleMessage.restore()
-        done()
+      message = new Buffer('Some bytes')
+      client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
+        delay 100, ->
+          assert(spy.called)
+          listenServer.handleMessage.restore()
+          done()
 
-  it 'should silently ignore a buffer of invalid JSON', (done) ->
-    spy = sinon.spy(listenServer, 'incomingData')
+    it 'should silently ignore a buffer of invalid JSON', (done) ->
+      spy = sinon.spy(listenServer, 'incomingData')
 
-    message = new Buffer('Some bytes')
-    client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
-      delay 100, ->
-        assert(spy.callCount == 0)
-        listenServer.incomingData.restore()
-        done()
+      message = new Buffer('Some bytes')
+      client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
+        delay 100, ->
+          assert(spy.callCount == 0)
+          listenServer.incomingData.restore()
+          done()
 
-  it 'should accept a buffer of valid JSON', (done) ->
-    spy = sinon.spy(listenServer, 'incomingData')
+    it 'should accept a buffer of valid JSON', (done) ->
+      spy = sinon.spy(listenServer, 'incomingData')
 
-    data = {
-      "Thing": "It's a thing"
-    }
-    message = new Buffer(JSON.stringify(data))
-    client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
-      delay 100, ->
-        assert(spy.calledOnce)
-        listenServer.incomingData.restore()
-        done()
+      data = {
+        "Thing": "It's a thing"
+      }
+      message = new Buffer(JSON.stringify(data))
+      client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
+        delay 100, ->
+          assert(spy.calledOnce)
+          listenServer.incomingData.restore()
+          done()
 
   describe 'passphrases', ->
     data = null
@@ -140,5 +141,21 @@ describe 'ListenServer', ->
           assert(!dataArg.hasOwnProperty('objectType'))
           assert(!dataArg.hasOwnProperty('passphrase'))
 
+          mongodb.Collection.prototype.insert.restore()
+          done()
+
+    it 'inserts the data given if all other things are good', (done) ->
+      sinon.stub(mongodb.Collection.prototype, 'insert')
+      data =
+        'objectType' : 'User'
+        'oneThing'   : 'Thing'
+        'otherData'  : 'Something'
+
+      message = new Buffer(JSON.stringify(data))
+      client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
+        delay 100, ->
+          dataArg = mongodb.Collection.prototype.insert.args[0][0]
+          assert(dataArg.oneThing == 'Thing')
+          assert(dataArg.otherData == 'Something')
           mongodb.Collection.prototype.insert.restore()
           done()
