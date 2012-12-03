@@ -21,7 +21,7 @@ class ListenServer
 
   start: (port) ->
     server = dgram.createSocket("udp4")
-    server.on("listening", @onSocketListen)
+    # server.on("listening", @onSocketListen)
     server.on("message", @onSocketMessage)
     server.listenServer = this
     server.bind(port)
@@ -31,8 +31,8 @@ class ListenServer
   stop: ->
     @server.close()
 
-  onSocketListen: ->
-    console.log "server listening #{@address().address}:#{@address().port}"
+  # onSocketListen: ->
+  #   console.log "server listening #{@address().address}:#{@address().port}"
 
   onSocketMessage: (msg, rinfo) ->
     # Handle the message in the scope of ListenServer, not the Socket
