@@ -1,6 +1,7 @@
 assert     = require 'assert'
 sinon      = require 'sinon'
 dgram      = require 'dgram'
+mongodb    = require 'mongodb'
 server     = require '../server'
 portNumber = 12345
 
@@ -13,13 +14,12 @@ describe 'ListenServer', ->
   beforeEach (done) ->
     client = dgram.createSocket("udp4")
     listenServer = new server()
-    listenServer.start(portNumber)
+    listenServer.start portNumber
     done()
 
-  afterEach (done) ->
+  afterEach ->
     client.close()
     listenServer.stop()
-    done()
 
   it 'should start up and accept messages', (done) ->
     spy = sinon.spy(listenServer, 'handleMessage')
@@ -55,14 +55,15 @@ describe 'ListenServer', ->
         done()
 
   describe 'passphrases', ->
-    data = {
-      "Thing": "It's a thing"
-    }
+    data = null
 
-    afterEach (done) ->
+    beforeEach ->
+      data = {
+        "Thing": "It's a thing"
+      }
+
+    afterEach ->
       listenServer.setPassphrase = ''
-      delete data.passphrase
-      done()
 
     it 'should go right through if no passphrase is set', (done) ->
       spy = sinon.spy(listenServer, 'incomingData')
@@ -97,3 +98,47 @@ describe 'ListenServer', ->
           listenServer.incomingData.restore()
           done()
 
+  describe 'mongodb', ->
+    it 'should ignore data without an objectType', (done) ->
+      spy = sinon.spy(mongodb.Db.prototype, 'collection')
+      data =
+        'otherData'  : 'Something'
+
+      message = new Buffer(JSON.stringify(data))
+      client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
+        delay 100, ->
+          assert(spy.callCount == 0)
+          mongodb.Db.prototype.collection.restore()
+          done()
+
+    it 'should remove the passphrase and objectType from the data before inserting', (done) ->
+      sinon.stub(mongodb.Db.prototype, 'collection')
+      data =
+        'objectType' : 'User'
+        'otherData'  : 'Something'
+
+      message = new Buffer(JSON.stringify(data))
+      client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
+        delay 100, ->
+          dataArg = mongodb.Db.prototype.collection.args[0][0]
+          assert(dataArg == 'fnf-User')
+          mongodb.Db.prototype.collection.restore()
+          done()
+
+    it 'should prepend fnf- to the objectType for the colleciton name', (done) ->
+      sinon.stub(mongodb.Collection.prototype, 'insert')
+      data =
+        'objectType' : 'User'
+        'otherData'  : 'Something'
+
+      message = new Buffer(JSON.stringify(data))
+      client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
+        delay 100, ->
+          dataArg = mongodb.Collection.prototype.insert.args[0][0]
+
+          assert(dataArg.hasOwnProperty('otherData'))
+          assert(!dataArg.hasOwnProperty('objectType'))
+          assert(!dataArg.hasOwnProperty('passphrase'))
+
+          mongodb.Collection.prototype.insert.restore()
+          done()

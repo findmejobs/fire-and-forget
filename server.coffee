@@ -1,4 +1,5 @@
-dgram = require "dgram"
+dgram = require 'dgram'
+mongodb = require 'mongodb'
 
 class ListenServer
   passphrase: ''
@@ -16,11 +17,20 @@ class ListenServer
 
   incomingData: (data) ->
     if data.objectType
-      @mongoConnection.collection "fnf-#{data.objectType}", (err, conn) ->
+      @database().collection "fnf-#{data.objectType}", (err, coll) ->
+        delete data.passphrase
+        delete data.objectType
         coll.insert data, {safe:true}, (err) ->
+          console.log err
+
+  databaseServer: ->
+    @databaseServerObj ||= new mongodb.Server('127.0.0.1', 27017, {})
+
+  database: ->
+    @databaseObj ||= new mongodb.Db('test', @databaseServer(), {w: 1})
 
   start: (port) ->
-    server = dgram.createSocket("udp4")
+    server = dgram.createSocket 'udp4'
     # server.on("listening", @onSocketListen)
     server.on("message", @onSocketMessage)
     server.listenServer = this
