@@ -16,7 +16,8 @@
     "coffee-script" : ">= 1.2.0",
     "sinon"         : ">= 1.5.2",
     "JSON"          : ">= 1.0.0",
-    "mongodb"       : ">= 1.2.1"
+    "mongodb"       : ">= 1.2.1",
+    "optparse"      : ">= 1.0.3"
   }
 }
 

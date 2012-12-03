@@ -2,7 +2,10 @@ dgram = require 'dgram'
 mongodb = require 'mongodb'
 
 class ListenServer
-  passphrase: ''
+  passphrase : ''
+  hostname   : 'localhost'
+  dbpost     : 42314
+
   handleMessage: (msg, rinfo) ->
     try
       data = JSON.parse(msg)
@@ -17,21 +20,25 @@ class ListenServer
 
   incomingData: (data) ->
     if data.objectType
-      @database().collection "fnf-#{data.objectType}", (err, coll) ->
-        delete data.passphrase
-        delete data.objectType
-        coll.insert data, {safe:true}, (err) ->
-          console.log err
+      databaseObj = @database()
+      databaseObj.open ->
+        databaseObj.collection "fnf-#{data.objectType}", (err, coll) ->
+          delete data.passphrase
+          delete data.objectType
+          coll.insert data, {}, (err) ->
+            if err
+              console.log err
+        databaseObj.close()
 
   databaseServer: ->
-    @databaseServerObj ||= new mongodb.Server('127.0.0.1', 27017, {})
+    @databaseServerObj ||= new mongodb.Server(@hostname, @dbport)
 
-  database: ->
-    @databaseObj ||= new mongodb.Db('test', @databaseServer(), {w: 1})
+  database: (callback) ->
+    @databaseObj ||= new mongodb.Db('test', @databaseServer(), {w:1})
 
   start: (port) ->
     server = dgram.createSocket 'udp4'
-    # server.on("listening", @onSocketListen)
+    server.on("listening", @onSocketListen)
     server.on("message", @onSocketMessage)
     server.listenServer = this
     server.bind(port)
@@ -41,8 +48,8 @@ class ListenServer
   stop: ->
     @server.close()
 
-  # onSocketListen: ->
-  #   console.log "server listening #{@address().address}:#{@address().port}"
+  onSocketListen: ->
+    console.log "server listening #{@address().address}:#{@address().port}"
 
   onSocketMessage: (msg, rinfo) ->
     # Handle the message in the scope of ListenServer, not the Socket
