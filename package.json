@@ -5,7 +5,7 @@
   "description": "A daemon for collecting user actions.",
   "licenses":     [{
     "type":       "MIT",
-    "url":        "http://github.com/github/hubot/raw/master/LICENSE"
+    "url":        "http://github.com/tedkulp/fire-and-forget/raw/master/LICENSE"
   }],
   "engines" : {
     "node" : "0.8.x",
