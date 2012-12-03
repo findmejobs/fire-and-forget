@@ -1,14 +1,23 @@
 dgram = require "dgram"
 
 class ListenServer
+  passphrase: ''
   handleMessage: (msg, rinfo) ->
     try
       data = JSON.parse(msg)
-      if data
+      if data and @checkPassphrase(data)
         @incomingData(data)
 
+  checkPassphrase: (data) ->
+    if @passphrase == ''
+      true
+    else
+      data.passphrase and data.passphrase == @passphrase
+
   incomingData: (data) ->
-    console.log data
+    if data.objectType
+      @mongoConnection.collection "fnf-#{data.objectType}", (err, conn) ->
+        coll.insert data, {safe:true}, (err) ->
 
   start: (port) ->
     server = dgram.createSocket("udp4")

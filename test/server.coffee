@@ -53,3 +53,47 @@ describe 'ListenServer', ->
         assert(spy.calledOnce)
         listenServer.incomingData.restore()
         done()
+
+  describe 'passphrases', ->
+    data = {
+      "Thing": "It's a thing"
+    }
+
+    afterEach (done) ->
+      listenServer.setPassphrase = ''
+      delete data.passphrase
+      done()
+
+    it 'should go right through if no passphrase is set', (done) ->
+      spy = sinon.spy(listenServer, 'incomingData')
+
+      message = new Buffer(JSON.stringify(data))
+      client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
+        delay 100, ->
+          assert(spy.calledOnce)
+          listenServer.incomingData.restore()
+          done()
+
+    it 'should silently fail if the passphrase is not correct', (done) ->
+      spy = sinon.spy(listenServer, 'incomingData')
+      listenServer.passphrase = '123456'
+
+      message = new Buffer(JSON.stringify(data))
+      client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
+        delay 100, ->
+          assert(spy.callCount == 0)
+          listenServer.incomingData.restore()
+          done()
+
+    it 'should get through if the passphrase is correct', (done) ->
+      spy = sinon.spy(listenServer, 'incomingData')
+      listenServer.passphrase = '123456'
+      data.passphrase = '123456'
+
+      message = new Buffer(JSON.stringify(data))
+      client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
+        delay 100, ->
+          assert(spy.calledOnce)
+          listenServer.incomingData.restore()
+          done()
+
