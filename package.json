@@ -1,0 +1,21 @@
+{
+  "name":        "fire-and-forget",
+  "version":     "0.0.1",
+  "author":      "Find Me Jobs",
+  "description": "A daemon for collecting user actions.",
+  "licenses":     [{
+    "type":       "MIT",
+    "url":        "http://github.com/github/hubot/raw/master/LICENSE"
+  }],
+  "engines" : {
+    "node" : "0.8.x",
+    "npm"  : "1.1.x"
+  },
+  "dependencies": {
+    "mocha": ">= 1.7.3",
+    "coffee-script": ">= 1.2.0",
+    "sinon": ">= 1.5.2",
+    "JSON": ">= 1.0.0"
+  }
+}
+
