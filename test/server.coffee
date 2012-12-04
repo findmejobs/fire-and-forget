@@ -112,7 +112,7 @@ describe 'ListenServer', ->
           mongodb.Db.prototype.collection.restore()
           done()
 
-    it 'should remove the passphrase and objectType from the data before inserting', (done) ->
+    it 'should use the objectType for the colleciton name', (done) ->
       sinon.stub(mongodb.Db.prototype, 'open').yields(null, listenServer.database())
       sinon.stub(mongodb.Db.prototype, 'collection')
       data =
@@ -125,7 +125,7 @@ describe 'ListenServer', ->
           assert(mongodb.Db.prototype.collection.called, "collection not called")
 
           dataArg = mongodb.Db.prototype.collection.args[0][0]
-          assert(dataArg == 'fnf-User')
+          assert(dataArg == 'User')
           mongodb.Db.prototype.collection.restore()
           mongodb.Db.prototype.open.restore()
           done()
@@ -147,7 +147,7 @@ describe 'ListenServer', ->
           mongodb.Db.prototype.open.restore()
           done()
 
-    it 'should prepend fnf- to the objectType for the colleciton name', (done) ->
+    it 'should remove the passphrase and objectType from the data before inserting', (done) ->
       sinon.stub(mongodb.Db.prototype, 'open').yields(null, listenServer.database())
       sinon.stub(mongodb.Collection.prototype, 'insert')
       data =

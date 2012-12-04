@@ -23,7 +23,7 @@ class ListenServer
     if data.objectType
       databaseObj = @database()
       databaseObj.open (err, conn) ->
-        conn.collection "fnf-#{data.objectType}", (err, coll) ->
+        conn.collection "#{data.objectType}", (err, coll) ->
           delete data.passphrase
           delete data.objectType
           unless data.createdAt
