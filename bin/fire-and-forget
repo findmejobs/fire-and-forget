@@ -7,6 +7,7 @@ switches = [
   [ '-p', '--port PORT',         'The port the udp server is running on' ],
   [ '-h', '--hostname HOSTNAME', 'The hostname the mongodb server is running on' ],
   [ '-P', '--dbport PORT',       'The port the mongodb server is running on (defaults to 42314)' ],
+  [ '-n', '--dbname NAME',       'The name of the mongodb database to write to (defaults to fireandforget)' ],
   [ '-k', '--passphrase STRING', 'The passphrase that all messages must contain to be accepted' ],
   [ "-h", "--help",               "Display the help information" ]
 ]
@@ -15,6 +16,7 @@ options =
   'hostname'   : 'localhost'
   'port'       : 42314
   'dbport'     : 27017
+  'dbname'     : 'fireandforget'
   'passphrase' : ''
 
 parser = new optparse.OptionParser(switches)
@@ -28,6 +30,9 @@ parser.on 'port', (opt, value) ->
 
 parser.on 'dbport', (opt, value) ->
   options.dbport = value
+
+parser.on 'dbname', (opt, value) ->
+  options.dbname = value
 
 parser.on 'passphrase', (opt, value) ->
   options.passphrase = value
@@ -46,4 +51,5 @@ listenServer = new server()
 listenServer.passphrase = options.passphrase
 listenServer.hostname = options.hostname
 listenServer.dbport = options.dbport
+listenServer.databaseName = options.dbname
 listenServer.start(options.port)

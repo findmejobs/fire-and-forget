@@ -2,9 +2,10 @@ dgram = require 'dgram'
 mongodb = require 'mongodb'
 
 class ListenServer
-  passphrase : ''
-  hostname   : 'localhost'
-  dbport     : 27017
+  passphrase   : ''
+  hostname     : 'localhost'
+  dbport       : 27017
+  databaseName : 'fireandforget'
 
   handleMessage: (msg, rinfo) ->
     try
@@ -36,7 +37,7 @@ class ListenServer
     @databaseServerObj ||= new mongodb.Server(@hostname, @dbport)
 
   database: (callback) ->
-    @databaseObj ||= new mongodb.Db('test', @databaseServer(), {w:1})
+    @databaseObj ||= new mongodb.Db(@databaseName, @databaseServer(), {w:1})
 
   start: (port) ->
     server = dgram.createSocket 'udp4'
