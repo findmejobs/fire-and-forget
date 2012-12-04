@@ -4,7 +4,7 @@ mongodb = require 'mongodb'
 class ListenServer
   passphrase : ''
   hostname   : 'localhost'
-  dbpost     : 42314
+  dbport     : 27017
 
   handleMessage: (msg, rinfo) ->
     try
@@ -21,14 +21,16 @@ class ListenServer
   incomingData: (data) ->
     if data.objectType
       databaseObj = @database()
-      databaseObj.open ->
-        databaseObj.collection "fnf-#{data.objectType}", (err, coll) ->
+      databaseObj.open (err, conn) ->
+        conn.collection "fnf-#{data.objectType}", (err, coll) ->
           delete data.passphrase
           delete data.objectType
+          unless data.createdAt
+            data.createdAt = new Date()
           coll.insert data, {}, (err) ->
             if err
               console.log err
-        databaseObj.close()
+        conn.close()
 
   databaseServer: ->
     @databaseServerObj ||= new mongodb.Server(@hostname, @dbport)

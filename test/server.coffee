@@ -113,6 +113,7 @@ describe 'ListenServer', ->
           done()
 
     it 'should remove the passphrase and objectType from the data before inserting', (done) ->
+      sinon.stub(mongodb.Db.prototype, 'open').yields(null, listenServer.database())
       sinon.stub(mongodb.Db.prototype, 'collection')
       data =
         'objectType' : 'User'
@@ -121,12 +122,33 @@ describe 'ListenServer', ->
       message = new Buffer(JSON.stringify(data))
       client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
         delay 100, ->
+          assert(mongodb.Db.prototype.collection.called, "collection not called")
+
           dataArg = mongodb.Db.prototype.collection.args[0][0]
           assert(dataArg == 'fnf-User')
           mongodb.Db.prototype.collection.restore()
+          mongodb.Db.prototype.open.restore()
+          done()
+
+    it 'should insert createdAt timestamp if not given', (done) ->
+      sinon.stub(mongodb.Db.prototype, 'open').yields(null, listenServer.database())
+      sinon.stub(mongodb.Collection.prototype, 'insert')
+      data =
+        'objectType' : 'User'
+        'otherData'  : 'Something'
+
+      message = new Buffer(JSON.stringify(data))
+      client.send message, 0, message.length, portNumber, 'localhost', (err, bytes) ->
+        delay 100, ->
+          dataArg = mongodb.Collection.prototype.insert.args[0][0]
+          assert(dataArg.hasOwnProperty('createdAt'))
+
+          mongodb.Collection.prototype.insert.restore()
+          mongodb.Db.prototype.open.restore()
           done()
 
     it 'should prepend fnf- to the objectType for the colleciton name', (done) ->
+      sinon.stub(mongodb.Db.prototype, 'open').yields(null, listenServer.database())
       sinon.stub(mongodb.Collection.prototype, 'insert')
       data =
         'objectType' : 'User'
@@ -142,9 +164,11 @@ describe 'ListenServer', ->
           assert(!dataArg.hasOwnProperty('passphrase'))
 
           mongodb.Collection.prototype.insert.restore()
+          mongodb.Db.prototype.open.restore()
           done()
 
     it 'inserts the data given if all other things are good', (done) ->
+      sinon.stub(mongodb.Db.prototype, 'open').yields(null, listenServer.database())
       sinon.stub(mongodb.Collection.prototype, 'insert')
       data =
         'objectType' : 'User'
@@ -158,4 +182,5 @@ describe 'ListenServer', ->
           assert(dataArg.oneThing == 'Thing')
           assert(dataArg.otherData == 'Something')
           mongodb.Collection.prototype.insert.restore()
+          mongodb.Db.prototype.open.restore()
           done()
