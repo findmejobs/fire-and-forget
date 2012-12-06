@@ -6,6 +6,7 @@ class ListenServer
   hostname     : 'localhost'
   dbport       : 27017
   databaseName : 'fireandforget'
+  quiet        : false
 
   handleMessage: (msg, rinfo) ->
     try
@@ -52,7 +53,8 @@ class ListenServer
     @server.close()
 
   onSocketListen: ->
-    console.log "server listening #{@address().address}:#{@address().port}"
+    unless @listenServer.quiet
+      console.log "server listening #{@address().address}:#{@address().port}"
 
   onSocketMessage: (msg, rinfo) ->
     # Handle the message in the scope of ListenServer, not the Socket

@@ -14,6 +14,7 @@ describe 'ListenServer', ->
   beforeEach (done) ->
     client = dgram.createSocket("udp4")
     listenServer = new server()
+    listenServer.quiet = true
     listenServer.start portNumber
     done()
 

@@ -10,6 +10,7 @@ switches = [
   [ '-n', '--dbname NAME',       'The name of the mongodb database to write to (defaults to fireandforget)' ],
   [ '-k', '--passphrase STRING', 'The passphrase that all messages must contain to be accepted' ],
   [ "-h", "--help",               "Display the help information" ]
+  [ "-q", "--quiet",              "Do not display any non-error output" ]
 ]
 
 options =
@@ -18,6 +19,7 @@ options =
   'dbport'     : 27017
   'dbname'     : 'fireandforget'
   'passphrase' : ''
+  'quiet'      : false
 
 parser = new optparse.OptionParser(switches)
 parser.banner = 'Usage fire-and-forget [options]'
@@ -37,6 +39,9 @@ parser.on 'dbname', (opt, value) ->
 parser.on 'passphrase', (opt, value) ->
   options.passphrase = value
 
+parser.on 'quiet', (opt, value) ->
+  options.quiet = true
+
 parser.on "help", (opt, value) ->
   console.log parser.toString()
   process.exit 0
@@ -52,4 +57,5 @@ listenServer.passphrase = options.passphrase
 listenServer.hostname = options.hostname
 listenServer.dbport = options.dbport
 listenServer.databaseName = options.dbname
+listenServer.quiet = options.quiet
 listenServer.start(options.port)
