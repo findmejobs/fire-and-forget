@@ -1,6 +1,6 @@
 {
   "name"        : "fire-and-forget",
-  "version"     : "0.0.1",
+  "version"     : "0.0.2",
   "author"      : "Find Me Jobs",
   "description" : "A daemon for collecting user actions.",
   "licenses"    : [{
@@ -21,6 +21,6 @@
     "JSON"          : ">= 1.0.0",
     "mongodb"       : ">= 1.2.1",
     "optparse"      : ">= 1.0.3"
-  }
+  },
+  "bin": { "fire-and-forget": "./bin/fire-and-forget" }
 }
-
