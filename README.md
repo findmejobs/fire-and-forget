@@ -1,4 +1,4 @@
-Fire and Forget [![Build Status](https://secure.travis-ci.org/tedkulp/fire-and-forget.png)](http://secure.travis-ci.org/tedkulp/fire-and-forget)
+Fire and Forget [![Build Status](https://secure.travis-ci.org/findmejobs/fire-and-forget.png)](http://secure.travis-ci.org/findmejobs/fire-and-forget)
 ===============
 
 A simple daemon for storing generic actions and storing them in
